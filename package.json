@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/poking123/TicTacToe/issues"
   },
-  "homepage": "https://github.com/poking123/TicTacToe#readme"
+  "homepage": "https://github.com/poking123/TicTacToe#readme",
+  "dependencies": {
+    "wait-for-user-input": "^1.0.0"
+  }
 }
