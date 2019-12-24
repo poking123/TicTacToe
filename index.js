@@ -4,29 +4,29 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-rl.on('line', (move) => {
-    move = parseInt(move);
-    if (isLegalMove(move, board, possibleMoves)) {
-        makeMove(move, board, player);
-        possibleMoves = possibleMoves.filter(m => m !== move);
-        player = 1 - player;
-    } else {
-        console.log(`The move (${move}) is not legal. Please choose a legal move.`)
-    }
+// rl.on('line', (move) => {
+//     move = parseInt(move);
+//     if (isLegalMove(move, board, possibleMoves)) {
+//         makeMove(move, board, player);
+//         possibleMoves = possibleMoves.filter(m => m !== move);
+//         player = 1 - player;
+//     } else {
+//         console.log(`The move (${move}) is not legal. Please choose a legal move.`)
+//     }
     
-    // console.log(`Received: ${input}`);
-    let gameFinished = gameIsFinished(board);
+//     // console.log(`Received: ${input}`);
+//     let gameFinished = gameIsFinished(board);
 
-    if (gameFinished) {
-        player = 1 - player;
-        console.log(`Player ${player} has won!!!`);
-        printOnlyBoard(board);
+//     if (gameFinished) {
+//         player = 1 - player;
+//         console.log(`Player ${player} has won!!!`);
+//         printOnlyBoard(board);
 
-        process.exit();
-    } else {
-        printBoard(board, player, possibleMoves);
-    }
-});
+//         process.exit();
+//     } else {
+//         printBoard(board, player, possibleMoves);
+//     }
+// });
 
 let board = [
     [2, 2, 2],
@@ -38,7 +38,25 @@ let possibleMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 let player = 0;
 
-printBoard(board, player, possibleMoves);
+playGame();
+
+function playGame() {
+    printBoard(board, player, possibleMoves);
+    while (!gameIsFinished(board)) {
+        humanPlayer();
+        player = 1 - player;
+        printBoard(board, player, possibleMoves);
+    }
+}
+
+function humanPlayer() {
+    rl.question('Possible Moves: ' + possibleMoves, (move) => {
+        if (isLegalMove(move, board, possibleMoves)) {
+            makeMove(move, board, player);
+        }
+        rl.close();
+    });
+}
 
 function makeMove(move, board, player) {
     move--;
