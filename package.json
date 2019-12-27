@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/poking123/TicTacToe#readme",
   "dependencies": {
-    "wait-for-user-input": "^1.0.0"
+    "create-react-app": "^3.3.0"
   }
 }

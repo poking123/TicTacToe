@@ -1,3 +1,5 @@
+const waitForUserInput = require('wait-for-user-input');
+
 const readline = require("readline");
 const rl = readline.createInterface({
     input: process.stdin,
@@ -38,24 +40,45 @@ let possibleMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 let player = 0;
 
-playGame();
+// playGame(humanPlayer, humanPlayer);
+test();
+async function test() {
+    let currMove;
+    await rl.question('Please input a move:', (move) => {
+        currMove = move;
+        rl.close();
+    });
+    console.log('currMove is, ', currMove);
+}
 
-function playGame() {
+async function playGame(player1, player2) {
     printBoard(board, player, possibleMoves);
     while (!gameIsFinished(board)) {
-        humanPlayer();
+        if (player === 0) {
+            await player1();
+        } else {
+            player2()
+        }
         player = 1 - player;
         printBoard(board, player, possibleMoves);
     }
 }
 
-function humanPlayer() {
-    rl.question('Possible Moves: ' + possibleMoves, (move) => {
-        if (isLegalMove(move, board, possibleMoves)) {
-            makeMove(move, board, player);
-        }
+async function humanPlayer() {
+    let currMove;
+    rl.question('Please input a move:', (move) => {
+        currMove = move;
         rl.close();
     });
+    while (!isLegalMove(currMove, board, possibleMoves)) {
+        console.log('test');
+        rl.question('Please input a move:', (move) => {
+            currMove = move;
+            rl.close();
+        });
+    }
+
+    makeMove(currMove, board, player);
 }
 
 function makeMove(move, board, player) {
@@ -66,7 +89,7 @@ function makeMove(move, board, player) {
 }
 
 function isLegalMove(move, board, possibleMoves) {
-    if (move < 1 || move > 9 || !possibleMoves.includes(move)) return false;
+    if (move === undefined || isNaN(move) || move < 1 || move > 9 || !possibleMoves.includes(move)) return false;
     move--;
     let row = Math.floor(move / 3);
     let col = move % 3;

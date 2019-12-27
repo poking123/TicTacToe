@@ -1,0 +1,15 @@
+#board {
+    background-image: url(../images/board.jpg);
+    background-repeat: no-repeat;
+    min-height: 355px;
+    width: 355px;
+    display: grid;
+    grid-template-columns: 111px 111px 111px;
+    grid-template-rows: 111px 111px 111px;
+    grid-row-gap: 0.75em;
+    grid-column-gap: 0.75em;
+}
+
+.emptyBoardPiece {
+    visibility: hidden;
+}
