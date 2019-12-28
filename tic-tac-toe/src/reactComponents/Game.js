@@ -11,8 +11,10 @@ class Game extends Component {
                 [0, 0, 0],
                 [0, 0, 0],
             ],
-            playerOneType: 'human',
-            playerTwoType: 'computer',
+            // playerOneType: 'human',
+            // playerTwoType: 'computer',
+            playerOneType: 'computer',
+            playerTwoType: 'human',
             playerMessage: '',
         }
     }
@@ -137,58 +139,65 @@ class Game extends Component {
     makeComputerMove = () => {
         let { board } = this.state;
         // minimax returns [moveNumber, optimalMoveValue]
-        let moveNumber = this.minimax(board, this.state.player, 10)[0];
+        let moveNumber = this.minimax(board, this.state.player, 10, 0)[0];
         let thinkingTime = Math.random() * 2 + 1;
         setTimeout(() => { this.makeActualMove(moveNumber); }, thinkingTime * 1000);
         // this.makeActualMove(moveNumber);
     }
 
-    minimax = (board, player, depth) => {
+    minimax = (board, player, maxDepth, currDepth = 0) => {
         // Player 1 = maximize
         // Player 2 = minimize
-        if (depth === 0) return [-1, this.evaluateBoard(board)]; // dummy value since we don't know the previous move
+        if (currDepth === maxDepth) return [-1, this.evaluateBoard(board)]; // dummy value since we don't know the previous move
         let possibleMoves = this.returnPossibleMoves(board);
         let gameIsFinished = this.gameIsFinished(board);
         if (possibleMoves.length === 0 || gameIsFinished) return [-1, this.evaluateBoard(board)]; // dummy value since we don't know the previous move
-        if (depth === 2) {
-            console.log('possibleMoves is ', possibleMoves);
-        }
+        // if (depth === 2) {
+        //     console.log('possibleMoves is ', possibleMoves);
+        // }
         let optimalMoves = [];
         let optimalMoveValue;
+        let optimalDepth;
         // console.log('before for loop - optimalMoves is ', optimalMoves);
         // console.log('before for loop - optimalMoveValue is ', optimalMoveValue);
         for (let i = 0; i < possibleMoves.length; i++) {
             let currMove = possibleMoves[i];
-            if (depth === 2) {
-                console.log('player is ', player);
-                console.log('currMove is ', currMove);
-                console.log('board BEFORE');
-                console.log('board[0] is ', board[0]);
-                console.log('board[1] is ', board[1]);
-                console.log('board[2] is ', board[2]);
-                console.log('board AFTER');
-            }
+            // if (depth === 2) {
+            //     console.log('player is ', player);
+            //     console.log('currMove is ', currMove);
+            //     console.log('board BEFORE');
+            //     console.log('board[0] is ', board[0]);
+            //     console.log('board[1] is ', board[1]);
+            //     console.log('board[2] is ', board[2]);
+            //     console.log('board AFTER');
+            // }
             
             let newBoard = this.makeMove(currMove, board, player);
-            if (depth === 2) {
-                console.log('newBoard[0] is ', newBoard[0]);
-                console.log('newBoard[1] is ', newBoard[1]);
-                console.log('newBoard[2] is ', newBoard[2]);
-            }
-            let minimaxResults = this.minimax(newBoard, 3 - player, depth - 1);
-            if (depth === 2) {
-                console.log('minimax results are ', minimaxResults);
-            }
+            // if (depth === 2) {
+            //     console.log('newBoard[0] is ', newBoard[0]);
+            //     console.log('newBoard[1] is ', newBoard[1]);
+            //     console.log('newBoard[2] is ', newBoard[2]);
+            // }
+            let minimaxResults = this.minimax(newBoard, 3 - player, maxDepth, currDepth + 1);
+            // if (depth === 2) {
+            //     console.log('minimax results are ', minimaxResults);
+            // }
             let currBoardEvaluation = minimaxResults[1];
-            if (depth === 2) {
-                console.log('currBoardEvaluation is ', currBoardEvaluation);
-            }
+            // if (depth === 2) {
+            //     console.log('currBoardEvaluation is ', currBoardEvaluation);
+            // }
             if (optimalMoves.length === 0) {
                 optimalMoves.push(currMove);
                 optimalMoveValue = currBoardEvaluation;
+                optimalDepth = currDepth;
             } else {
                 if (currBoardEvaluation === optimalMoveValue) {
-                    optimalMoves.push(currMove);
+                    if (optimalDepth === currDepth) {
+                        optimalMoves.push(currMove);
+                    } else if (currDepth < optimalDepth) {
+                        optimalMoves = [currMove];
+                        optimalDepth = currDepth;
+                    }
                 } else {
                     if (player === 1) {
                         if (currBoardEvaluation > optimalMoveValue) {
@@ -205,10 +214,10 @@ class Game extends Component {
             }
 
         }
-        if (depth === 2) {
-            console.log('at the end, optimalMoves is ', optimalMoves);
-            console.log('at the end, optimalMoveValue is ', optimalMoveValue);
-        }
+        // if (depth === 2) {
+        //     console.log('at the end, optimalMoves is ', optimalMoves);
+        //     console.log('at the end, optimalMoveValue is ', optimalMoveValue);
+        // }
         if (optimalMoves.length === 1) {
             return [optimalMoves[0], optimalMoveValue];
         } else {
@@ -237,6 +246,23 @@ class Game extends Component {
             player: this.gameConstants.playerOne,
             board: emptyBoardCopy,
         }, () => this.checkIfMakeMove());
+    }
+
+    switchPlayerOrder = () => {
+        let { playerOneType } = this.state;
+        let player1NewType;
+        let player2NewType;
+        if (playerOneType === 'human') {
+            player1NewType = 'computer';
+            player2NewType = 'human';
+        } else {
+            player1NewType = 'human';
+            player2NewType = 'computer';
+        }
+        this.setState({
+            playerOneType: player1NewType,
+            playerTwoType: player2NewType,
+        }, () => this.resetBoard());
     }
 
     gameIsFinished = (board) => {
@@ -310,6 +336,11 @@ class Game extends Component {
                 <Board makeHumanMove={this.makeHumanMove} boardData={boardData} dimensionData={dimensionData}/>
                 {playerMessage}
                 <button onClick={() => this.resetBoard()}>Reset Game</button>
+                <br /><br />
+                <button onClick={() => this.switchPlayerOrder()}>Switch Player Order</button>
+                <br /><br />
+                <p>Player 1: {this.state.playerOneType}</p>
+                <p>Player 2: {this.state.playerTwoType}</p>
             </div>
         )
     }
