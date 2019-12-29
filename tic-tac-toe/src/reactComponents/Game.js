@@ -16,6 +16,7 @@ class Game extends Component {
             playerOneType: 'computer',
             playerTwoType: 'human',
             playerMessage: '',
+            computerMoveQueue: [],
         }
     }
 
@@ -109,11 +110,14 @@ class Game extends Component {
 
     computerToMove = () => {
         let currPlayerType;
+        console.log('in computerToMove');
+        console.log('once again, state is ', this.state);
         if (this.state.player === 1) {
             currPlayerType = this.state.playerOneType;
         } else {
             currPlayerType = this.state.playerTwoType;
         }
+        console.log('currPLayerType is ', currPlayerType);
         return currPlayerType === 'computer';
     }
 
@@ -137,12 +141,17 @@ class Game extends Component {
     }
 
     makeComputerMove = () => {
-        let { board } = this.state;
-        // minimax returns [moveNumber, optimalMoveValue]
-        let moveNumber = this.minimax(board, this.state.player, 10, 0)[0];
-        let thinkingTime = Math.random() * 2 + 1;
-        setTimeout(() => { this.makeActualMove(moveNumber); }, thinkingTime * 1000);
-        // this.makeActualMove(moveNumber);
+        let { board, computerMoveQueue } = this.state;
+        if (computerMoveQueue.length !== 1) {
+            computerMoveQueue.shift();
+            this.setState({ computerMoveQueue });
+        } else {
+            // minimax returns [moveNumber, optimalMoveValue]
+            let moveNumber = this.minimax(board, this.state.player, 10, 0)[0];
+            let thinkingTime = Math.random() * 2 + 1;
+            setTimeout(() => { this.makeActualMove(moveNumber); }, thinkingTime * 1000);
+            // this.makeActualMove(moveNumber);
+        }
     }
 
     minimax = (board, player, maxDepth, currDepth = 0) => {
@@ -240,9 +249,17 @@ class Game extends Component {
         }
     }
 
+    
     resetBoard = () => {
+        let { computerMoveQueue } = this.state;
         let emptyBoardCopy = this.gameConstants.emptyBoard.map(row => [...row]);
+        console.log('state is ', this.state);
+        if (this.computerToMove()) {
+            console.log('got into computerToMove - adding true - push');
+            computerMoveQueue.push(true);
+        }
         this.setState({
+            computerMoveQueue,
             player: this.gameConstants.playerOne,
             board: emptyBoardCopy,
         }, () => this.checkIfMakeMove());
@@ -260,6 +277,7 @@ class Game extends Component {
             player2NewType = 'computer';
         }
         this.setState({
+            player: this.gameConstants.playerOne,
             playerOneType: player1NewType,
             playerTwoType: player2NewType,
         }, () => this.resetBoard());
@@ -312,7 +330,14 @@ class Game extends Component {
     }
 
     componentDidMount() {
-        this.setState({ playerMessage: <p>Player {this.state.player} to Move...</p> });
+        let { computerMoveQueue } = this.state;
+        if (this.computerToMove()) {
+            computerMoveQueue.push(true);
+        }
+        this.setState({ 
+            playerMessage: <p>Player {this.state.player} to Move...</p>,
+            computerMoveQueue,
+        });
         this.checkIfMakeMove();
     }
     
